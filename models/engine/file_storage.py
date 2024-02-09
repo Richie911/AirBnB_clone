@@ -1,6 +1,9 @@
 #!/usr/bin/python3
+from datetime import datetime
 import os
 import json
+
+import models
 
 class FileStorage:
     """ storage class"""
@@ -12,16 +15,27 @@ class FileStorage:
         return self.__dict__
     
     def new(self, obj):
-        self.__objects[f"{obj.__class__.__name__}.{obj.id}"] = obj.id
+        self.__objects[f"{obj.__class__.__name__}.{obj.id}"] = obj.__dict__
 
-    def save(self): 
-        json_string = json.dumps(self.__objects)
-        with open(self.__file_path, 'a') as file:
-            file.write(json_string)
+    def save(self):
+        """Serialize __objects to the JSON file."""
+        with open(self.__file_path, "w") as file:
+            json.dump(self.__objects, file, default=self.json_serializable)
+
+    def json_serializable(self, obj):
+        """Handle serialization of non-serializable objects."""
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        raise TypeError(f"Type {type(obj)} not serializable")
     
     def reload(self):
-        if os.path.exists(self.__file_path):
-            with open(self.__file_path, 'r') as file:
-                content = file.read()
-                my_dict = json.loads(content)
-                self.__objects = my_dict
+        """Deserialize the JSON file to objects."""
+        try:
+            with open(self.__file_path, 'r') as f:
+                data = json.load(f)
+                for key, value in data.items():
+                    class_name = value['__class__']
+                    obj = models[class_name](**value)
+                    self.__objects[key] = obj
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            pass
