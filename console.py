@@ -9,6 +9,7 @@ import re
 
 from models.engine.file_storage import FileStorage
 
+
 def parse(arg):
     curly_braces = re.search(r"\{(.*?)\}", arg)
     brackets = re.search(r"\[(.*?)\]", arg)
@@ -26,11 +27,10 @@ def parse(arg):
         retl.append(curly_braces.group())
         return retl
 
+
 class HBNBCommand(cmd.Cmd):
     """Command interpreter for HBNB program."""
-    
     prompt = "(hbnb) "
-
     __model_list = {
         "BaseModel",
         "User",
@@ -39,7 +39,8 @@ class HBNBCommand(cmd.Cmd):
         "Place",
         "Amenity",
         "Review"
-    }
+        }
+
     def do_quit(self, arg):
         """Quit command to exit the program."""
         return True
@@ -65,7 +66,8 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
 
     def do_show(self, arg):
-        """Print the string representation of an instance based on class name and ID."""
+        """Print the string representation of
+        an instance based on class name and ID."""
         args = shlex.split(arg)
         if not args:
             print("** class name missing **")
@@ -87,7 +89,6 @@ class HBNBCommand(cmd.Cmd):
         if key not in data:
             print("** no instance found **")
             return
-        
         print(f"[{class_name}] ({instance_id}) {data[key]}")
 
     def do_destroy(self, arg):
@@ -109,10 +110,9 @@ class HBNBCommand(cmd.Cmd):
         instance_id = args[1]
         key = "{}.{}".format(class_name, instance_id)
         print(key)
-        if key.split(".")[0] not in  HBNBCommand.__model_list:
+        if key.split(".")[0] not in HBNBCommand.__model_list:
             print("** no instance found **")
             return
-        
         data = storage.all()
         del data[key]
         with open('file.json', 'w') as file:
@@ -123,7 +123,6 @@ class HBNBCommand(cmd.Cmd):
         if arg not in HBNBCommand.__model_list:
             print("** class doesn't exist **")
             return
-        
         data = storage.all()
         filtered = []
         for key, value in data.items():
@@ -171,6 +170,7 @@ class HBNBCommand(cmd.Cmd):
         data[key] = instance
         with open('file.json', 'w') as file:
             json.dump(data, file, indent=2)
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
