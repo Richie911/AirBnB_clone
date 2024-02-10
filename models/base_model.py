@@ -39,7 +39,7 @@ class BaseModel:
     def to_dict(self):
         """returns a dictionary containing all
         keys/values of __dict__ of the instance"""
-        variable = self.__dict__
+        variable = self.__dict__.copy()
         variable["updated_at"] = self.updated_at.isoformat()
         variable["created_at"] = self.created_at.isoformat()
         variable["__class__"] = self.__class__.__name__
