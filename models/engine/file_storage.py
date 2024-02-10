@@ -12,7 +12,7 @@ class FileStorage:
         self.__objects = {}
 
     def all(self): 
-        return self.__dict__
+        return self.__objects
     
     def new(self, obj):
         self.__objects[f"{obj.__class__.__name__}.{obj.id}"] = obj.__dict__
@@ -34,8 +34,13 @@ class FileStorage:
             with open(self.__file_path, 'r') as f:
                 data = json.load(f)
                 for key, value in data.items():
-                    class_name = value['__class__']
-                    obj = models[class_name](**value)
-                    self.__objects[key] = obj
-        except (FileNotFoundError, json.decoder.JSONDecodeError):
+                    if '__class__' in value:
+                        class_name = value['__class__']
+                        model_class = getattr(__import__('models', fromlist=[class_name]), class_name)
+                        obj = model_class(**value)
+                self.__objects = data
+                return data
+        except FileNotFoundError:
             pass
+
+
